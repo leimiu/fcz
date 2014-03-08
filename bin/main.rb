@@ -8,21 +8,12 @@ module FCZ
   require 'requires.rb'
   require 'date'
   logger = FCZLogger.instance
-
-  #加载上次的位置
-  logger.info "尝试从配置文件中获取上次最后抓取的位置..."
-  timeline = DateTime.parse(FCZConfig.ending_time).to_time if FCZConfig.ending_time
-  if timeline.nil?
-    logger.info "未能获取上次的位置，从3d前开始抓取"
-    d = DateTime.now
-    d -= 3
-    timeline = DateTime.parse("#{d.strftime('%Y-%m-%d')} 00:00:00 +0800").to_time
-  end
-  logger.debug "抓取截止时间为：#{timeline}"
+  fetcher_pos = FetcherPos.new FCZConfig.air_code
+  timeline = fetcher_pos.loadpos()
 
   #开始解释配置文件
   speed=FCZConfig.speed
-  fetcher=(speed and speed == 'slow')?BrowserFetcher.new(timeline,FCZConfig.air_code):QuickFetcher.new(timeline,FCZConfig.air_code)
+  fetcher=(speed and speed == 'slow') ? BrowserFetcher.new(timeline, FCZConfig.air_code) : QuickFetcher.new(timeline, FCZConfig.air_code)
   logger.info "Speed Mode: #{speed}"
 
   start_page = FCZConfig.start_page
@@ -34,7 +25,7 @@ module FCZ
   lastDateline=nil
   saver = nil
   repeat_arr=[]
- while !bBreak
+  while !bBreak
     logger.info "抽取第#{(start_page)}页..."
     bBreak, list = fetcher.fetcher start_page
     logger.info "获取到#{list.size}条记录。"
@@ -66,13 +57,11 @@ module FCZ
       saver.save item
       repeat_arr<<item[:detail]
     end
-   start_page += 1
+    start_page += 1
   end
   fetcher.close
   saver.close if saver.public_methods.include? :close
 
   #保存位置信息
-  FCZConfig.set_config('ending_time',lastDateline) if lastDateline
-  FCZConfig.save
-
+  fetcher_pos.savepos(lastDateline) if lastDateline
 end

@@ -2,7 +2,6 @@ module FCZ
   class XlsReporter
     require 'win32ole'
     TplXlsx='tpl/fcz_tpl.xlsx'
-    OutDir='out'
 
     def initialize(dateRange)
       #raise "TEST/"
@@ -10,10 +9,10 @@ module FCZ
       file_name="“飞常准”民意测评(#{dateRange}).xlsx"
 
       #必要时创建目录
-      Dir.mkdir OutDir unless File.exist? OutDir
+      Dir.mkdir DIR_OUT unless File.exist? DIR_OUT
 
       #必要时创建文件
-      xlsFile="#{OutDir}/#{file_name}"
+      xlsFile="#{DIR_OUT}/#{file_name}"
       if !Dir.exist? xlsFile
         @logger.info "目录文件不存在，正在从模板中创建"
         require "fileutils"
@@ -21,14 +20,12 @@ module FCZ
         @logger.info "成功创建#{xlsFile}"
       end
 
-      file="#{::WORK_DIR}/#{xlsFile}"
-      @logger.debug "Target file: #{file}"
-
+      @logger.debug "Target file: #{xlsFile}"
       WIN32OLE.codepage = WIN32OLE::CP_UTF8
       @excel = WIN32OLE::new('excel.Application')
       @excel.visible = true
 
-      @workbook = @excel.Workbooks.Open(file)
+      @workbook = @excel.Workbooks.Open(xlsFile)
       @worksheet =@workbook.Worksheets(1) #定位到第一个sheet
       @worksheet.Select
 

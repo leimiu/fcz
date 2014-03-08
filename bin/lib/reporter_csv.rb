@@ -1,7 +1,5 @@
 module FCZ
   class CsvReporter
-    #require 'win32ole'
-
     def initialize(dateRange) #格式:12.20-12.25
       @logger = FCZLogger.instance
       filename="“飞常准”民意测评(#{dateRange}).csv"
