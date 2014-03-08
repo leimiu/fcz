@@ -1,0 +1,4 @@
+DevKit
+gem 升级
+gem install watir
+gem install nokogiri
